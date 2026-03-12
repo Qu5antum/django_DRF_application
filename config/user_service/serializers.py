@@ -23,6 +23,19 @@ class BecomeSellerSerializer(serializers.ModelSerializer):
         model = SellerProfile
         fields = ["store_name", "description"]
 
+        def create(self, validated_data):
+            user = self.context["request"].user
+
+            if hasattr(user, "seller_profile"):
+                raise serializers.ValidationError(
+                    "User is already a seller."
+                )
+
+            return SellerProfile.objects.create(
+                user=user,
+                **validated_data
+            )
+
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
